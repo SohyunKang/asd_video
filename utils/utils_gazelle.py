@@ -9,7 +9,6 @@ import scipy.io as io
 import os
 
 def load_timeseg(timeseg_file_path, input_video_path):
-
     with open(timeseg_file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -19,8 +18,6 @@ def load_timeseg(timeseg_file_path, input_video_path):
     for entry in data:
         if entry['id'] == input_video_path.split('/')[1][:-4]:
             target_word = entry['hybrid_segments'][0]['word']
-            print('호명 타깃: ', target_word)
-        
             for wse in entry["hybrid_segments"]:
                 if wse["word"] == target_word:
                     starts.append(float(wse["start"]))
@@ -29,7 +26,6 @@ def load_timeseg(timeseg_file_path, input_video_path):
 
     if starts and ends:
         start_sec = (starts[0]+ends[0])/2
-        print(f"Start: {start_sec:.2f}")
         return start_sec
     else:
         raise Exception(f"Target word of ID {input_video_path.split('/')[1][:-4]} doesn't exist.")
@@ -39,9 +35,6 @@ def load_video(input_video_path):
     cap = cv2.VideoCapture(input_video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-    print(f'fps: {fps:.2f},frame_count: {frame_count}')
-
     frames = []
     while True:
         ret, frame = cap.read()
@@ -85,7 +78,7 @@ def visualize_heatmap_to_video_save_prob(frames, output_video_path, outputs, val
     height, width = frames[0].shape[:2]  # (H, W)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))  # 20fps
-    print(outputs, valid_frame_num)
+    # print(outputs, valid_frame_num)
     
     # valid_frame_num을 빠르게 lookup 할 수 있도록 dict 생성
     frame_to_output = {n: outputs[idx] for idx, n in enumerate(valid_frame_num)}
@@ -94,7 +87,7 @@ def visualize_heatmap_to_video_save_prob(frames, output_video_path, outputs, val
     for v_f in valid_frame_num:
         if v_f/fps >= start_sec:
             end_sec = v_f/fps
-            print(f"반응 End: {end_sec:.2f}")
+            print(f"---> 반응 시간 : {end_sec:.2f}s")
             break
     hs = []
     inoutlist = []
@@ -157,8 +150,8 @@ def visualize_heatmap_to_video_save_prob(frames, output_video_path, outputs, val
         }
             )
 
-    print("VideoWriter size:", width, height)
-    print("Frame size:", frame_bgr.shape, frame_bgr.dtype)
+    # print("VideoWriter size:", width, height)
+    # print("Frame size:", frame_bgr.shape, frame_bgr.dtype)
     out.release()
     
     return end_sec
@@ -217,7 +210,7 @@ def visualize_heatmap_to_video_with_sound(frames, output_video_with_sound_path, 
         # 프레임을 PNG 파일로 저장
         overlay.save(f"{overlay_folder_name}/frame_{f_idx:05d}.png")
 
-    print("총 저장된 프레임 수:", len(os.listdir(overlay_folder_name)))
+    # print("총 저장된 프레임 수:", len(os.listdir(overlay_folder_name)))
 
     # --- 2) ffmpeg로 원본 비디오 + overlay PNG 합성 ---
 
@@ -228,5 +221,7 @@ def visualize_heatmap_to_video_with_sound(frames, output_video_with_sound_path, 
         f'-i "{input_video_path}" '
         f'-framerate {fps} -i {overlay_folder_name}/frame_%05d.png '
         '-filter_complex "[1:v]format=rgb24[ov];[0:v][ov]overlay=0:0:format=auto:eof_action=pass:repeatlast=0,format=yuv420p" '
-        f'-c:a copy "{output_video_with_sound_path}"'
+        f'-c:a copy '
+        '-hide_banner -loglevel error '
+        f'"{output_video_with_sound_path}"'
     )
