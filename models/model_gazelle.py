@@ -1,5 +1,7 @@
 import torch
 import numpy as np
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context  # ssl 에러 방지
 
 def load_model():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'

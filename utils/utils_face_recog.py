@@ -15,7 +15,7 @@ def load_timeseg(timeseg_file_path, input_video_path):
 
     target_word = ""
     for entry in data:
-        if entry['id'] == input_video_path.split('/')[1][:-4]:
+        if entry['id'] == input_video_path.split('/')[-1].split('.')[0]:
             target_word = entry['hybrid_segments'][0]['word']
             print('---> 호명 :', target_word)
         
@@ -30,7 +30,8 @@ def load_timeseg(timeseg_file_path, input_video_path):
         print(f"---> 호명 시작 시간 : {start_sec:.2f}s")
         return start_sec
     else:
-        raise Exception(f"Target word of ID {input_video_path.split('/')[1][:-4]} doesn't exist.")
+        # raise Exception(f"Target word of ID {input_video_path.split('/')[-1].split('.')[0]} doesn't exist.")  # 잠깐 꺼둠
+        return 0
 
 
 def load_video(input_video_path):

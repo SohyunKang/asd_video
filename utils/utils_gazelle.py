@@ -16,7 +16,7 @@ def load_timeseg(timeseg_file_path, input_video_path):
 
     target_word = ""
     for entry in data:
-        if entry['id'] == input_video_path.split('/')[1][:-4]:
+        if entry['id'] == input_video_path.split('/')[-1].split('.')[0]:
             target_word = entry['hybrid_segments'][0]['word']
             for wse in entry["hybrid_segments"]:
                 if wse["word"] == target_word:
@@ -28,7 +28,7 @@ def load_timeseg(timeseg_file_path, input_video_path):
         start_sec = (starts[0]+ends[0])/2
         return start_sec
     else:
-        raise Exception(f"Target word of ID {input_video_path.split('/')[1][:-4]} doesn't exist.")
+        raise Exception(f"Target word of ID {input_video_path.split('/')[-1].split('.')[0]} doesn't exist.")
 
 
 def load_video(input_video_path):
@@ -160,7 +160,7 @@ def visualize_heatmap_to_video_save_prob(frames, output_video_path, outputs, val
 
 def visualize_heatmap_to_video_with_sound(frames, output_video_with_sound_path, outputs, valid_frame_num, fps, start_sec, bboxes_all, model, input_video_path, end_sec):
     # --- 1) overlay된 프레임을 PNG 시퀀스로 저장 ---
-    overlay_folder_name = f"{input_video_path[:-4]}_overlay_frames"
+    overlay_folder_name = f"results/{input_video_path.split('/')[-1].split('.')[0]}_overlay_frames"
     os.makedirs(overlay_folder_name, exist_ok=True)
 
     height, width = frames[0].shape[:2]  # (H, W)
